@@ -19,6 +19,7 @@ import {
   getDateFromOption,
   isTableDataRangeOptionAvailable,
   isDashboardDateRangeOptionAvailable,
+  getAbbreviatedTimeRange,
 } from "@/src/utils/date-range-utils";
 import { useEntitlementLimit } from "@/src/features/entitlements/hooks";
 import { useMemo } from "react";
@@ -45,7 +46,6 @@ const BaseDateRangeDropdown = <T extends string>({
   return (
     <Select value={selectedOption} onValueChange={onSelectionChange}>
       <SelectTrigger className="w-fit font-medium hover:bg-accent hover:text-accent-foreground focus:ring-0 focus:ring-offset-0">
-        {selectedOption !== "All time" && <span>Past</span>}
         <SelectValue placeholder="Select" />
       </SelectTrigger>
       <SelectContent position="popper" defaultValue={60}>
@@ -166,11 +166,53 @@ export const TableDateRangeDropdown: React.FC<TableDateRangeDropdownProps> = ({
   };
 
   return (
-    <BaseDateRangeDropdown
-      selectedOption={selectedOption}
-      options={TABLE_AGGREGATION_OPTIONS}
-      limitedOptions={disabledOptions}
-      onSelectionChange={onDropDownSelection}
-    />
+    <Select value={selectedOption} onValueChange={onDropDownSelection}>
+      <SelectTrigger className="w-fit font-medium hover:bg-accent hover:text-accent-foreground focus:ring-0 focus:ring-offset-0">
+        <SelectValue placeholder="Select">
+          <div className="flex items-center gap-2">
+            <span className="w-10 rounded bg-muted px-1.5 py-0.5 text-center text-xs">
+              {getAbbreviatedTimeRange(selectedOption as any)}
+            </span>
+            <span>{selectedOption}</span>
+          </div>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent position="popper" defaultValue={60}>
+        {TABLE_AGGREGATION_OPTIONS.map((item) => {
+          const itemObj = (
+            <div
+              key={item}
+              className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+              onClick={() =>
+                !disabledOptions?.includes(item) && onDropDownSelection(item)
+              }
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-10 rounded bg-muted px-1.5 py-0.5 text-center text-xs">
+                  {getAbbreviatedTimeRange(item as any)}
+                </span>
+                <span>{item}</span>
+              </div>
+            </div>
+          );
+          const isLimited = disabledOptions?.includes(item);
+
+          return isLimited ? (
+            <HoverCard openDelay={200} key={item}>
+              <HoverCardTrigger asChild>
+                <span>{itemObj}</span>
+              </HoverCardTrigger>
+              <HoverCardPortal>
+                <HoverCardContent className="w-60 text-sm" side="right">
+                  This time range is not available in your current plan.
+                </HoverCardContent>
+              </HoverCardPortal>
+            </HoverCard>
+          ) : (
+            itemObj
+          );
+        })}
+      </SelectContent>
+    </Select>
   );
 };

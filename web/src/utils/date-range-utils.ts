@@ -3,31 +3,31 @@ import { z } from "zod/v4";
 import { addMinutes } from "date-fns";
 import { type DateTrunc } from "@langfuse/shared/src/server";
 
-export const DEFAULT_DASHBOARD_AGGREGATION_SELECTION = "24 hours" as const;
+export const DEFAULT_DASHBOARD_AGGREGATION_SELECTION = "Past 1 day" as const;
 export const DASHBOARD_AGGREGATION_PLACEHOLDER = "Custom" as const;
 
 export const DASHBOARD_AGGREGATION_OPTIONS = [
-  "5 min",
-  "30 min",
-  "1 hour",
-  "3 hours",
-  "24 hours",
-  "7 days",
-  "1 month",
-  "3 months",
-  "1 year",
+  "Past 5 min",
+  "Past 30 min",
+  "Past 1 hour",
+  "Past 3 hours",
+  "Past 1 day",
+  "Past 7 days",
+  "Past 30 days",
+  "Past 90 days",
+  "Past 1 year",
 ] as const;
 
 export const TABLE_AGGREGATION_OPTIONS = [
-  "30 min",
-  "1 hour",
-  "6 hours",
-  "24 hours",
-  "3 days",
-  "7 days",
-  "14 days",
-  "1 month",
-  "3 months",
+  "Past 30 min",
+  "Past 1 hour",
+  "Past 6 hours",
+  "Past 1 day",
+  "Past 3 days",
+  "Past 7 days",
+  "Past 14 days",
+  "Past 30 days",
+  "Past 90 days",
   "All time",
 ] as const;
 
@@ -70,39 +70,39 @@ export const dateTimeAggregationOptions = [
 
 export const dashboardDateRangeAggregationSettings: DashboardDateRangeAggregationSettings =
   {
-    "1 year": {
+    "Past 1 year": {
       date_trunc: "month",
       minutes: 365 * 24 * 60,
     },
-    "3 months": {
+    "Past 90 days": {
       date_trunc: "week",
-      minutes: 3 * 30 * 24 * 60,
+      minutes: 90 * 24 * 60,
     },
-    "1 month": {
+    "Past 30 days": {
       date_trunc: "day",
       minutes: 30 * 24 * 60,
     },
-    "7 days": {
+    "Past 7 days": {
       date_trunc: "hour",
       minutes: 7 * 24 * 60,
     },
-    "24 hours": {
+    "Past 1 day": {
       date_trunc: "hour",
       minutes: 24 * 60,
     },
-    "3 hours": {
+    "Past 3 hours": {
       date_trunc: "minute",
       minutes: 3 * 60,
     },
-    "1 hour": {
+    "Past 1 hour": {
       date_trunc: "minute",
       minutes: 60,
     },
-    "30 min": {
+    "Past 30 min": {
       date_trunc: "minute",
       minutes: 30,
     },
-    "5 min": {
+    "Past 5 min": {
       date_trunc: "minute",
       minutes: 5,
     },
@@ -140,15 +140,15 @@ const TABLE_DATE_RANGE_AGGREGATION_SETTINGS = new Map<
   TableDateRangeAggregationOption,
   number | null
 >([
-  ["3 months", 3 * 30 * 24 * 60],
-  ["1 month", 30 * 24 * 60],
-  ["14 days", 14 * 24 * 60],
-  ["7 days", 7 * 24 * 60],
-  ["3 days", 3 * 24 * 60],
-  ["24 hours", 24 * 60],
-  ["6 hours", 6 * 60],
-  ["1 hour", 60],
-  ["30 min", 30],
+  ["Past 90 days", 90 * 24 * 60],
+  ["Past 30 days", 30 * 24 * 60],
+  ["Past 14 days", 14 * 24 * 60],
+  ["Past 7 days", 7 * 24 * 60],
+  ["Past 3 days", 3 * 24 * 60],
+  ["Past 1 day", 24 * 60],
+  ["Past 6 hours", 6 * 60],
+  ["Past 1 hour", 60],
+  ["Past 30 min", 30],
   ["All time", null],
 ]);
 
@@ -201,6 +201,33 @@ export function isValidTableDateRangeAggregationOption(
 ): value is TableDateRangeAggregationOption {
   if (!value) return false;
   return (TABLE_AGGREGATION_OPTIONS as readonly string[]).includes(value);
+}
+
+// Function to convert time range options to abbreviated format
+export function getAbbreviatedTimeRange(
+  option: DateRangeAggregationOption,
+): string {
+  // Handle both old and new formats for backward compatibility
+  const cleanOption = option.replace(/^Past /, "");
+
+  const abbreviationMap: Record<string, string> = {
+    "5 min": "5m",
+    "30 min": "30m",
+    "1 hour": "1h",
+    "3 hours": "3h",
+    "6 hours": "6h",
+    "1 day": "1d",
+    "3 days": "3d",
+    "7 days": "7d",
+    "14 days": "14d",
+    "30 days": "30d",
+    "90 days": "90d",
+    "1 year": "1y",
+    "All time": "All",
+    Custom: "Custom",
+  };
+
+  return abbreviationMap[cleanOption] || abbreviationMap[option] || option;
 }
 
 export const findClosestDashboardInterval = (
