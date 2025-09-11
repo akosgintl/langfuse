@@ -21,7 +21,12 @@ import {
   DataTableRowHeightSwitch,
   type RowHeight,
 } from "@/src/components/table/data-table-row-height-switch";
-import { Search } from "lucide-react";
+import { Search, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/src/components/ui/tooltip";
 import { usePostHogClientCapture } from "@/src/features/posthog-analytics/usePostHogClientCapture";
 import { TableDateRangeDropdown } from "@/src/components/date-range-dropdowns";
 import {
@@ -32,6 +37,7 @@ import { DataTableSelectAllBanner } from "@/src/components/table/data-table-mult
 import { MultiSelect } from "@/src/features/filters/components/multi-select";
 import { cn } from "@/src/utils/tailwind";
 import { TableViewPresetsDrawer } from "@/src/components/table/table-view-presets/components/data-table-view-presets-drawer";
+import { useDataTableControls } from "@/src/components/table/data-table-controls";
 
 export interface MultiSelect {
   selectAll: boolean;
@@ -128,10 +134,31 @@ export function DataTableToolbar<TData, TValue>({
   );
 
   const capture = usePostHogClientCapture();
+  const { open: controlsPanelOpen, setOpen: setControlsPanelOpen } =
+    useDataTableControls();
 
   return (
     <div className={cn("grid h-fit w-full gap-0 px-2", className)}>
       <div className="my-2 flex flex-wrap items-center gap-2 @container">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setControlsPanelOpen(!controlsPanelOpen)}
+              className="h-8 w-8"
+            >
+              {controlsPanelOpen ? (
+                <PanelLeftClose className="h-4 w-4" />
+              ) : (
+                <PanelLeftOpen className="h-4 w-4" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent forceMount>
+            <span>{controlsPanelOpen ? "Hide filters" : "Show filters"}</span>
+          </TooltipContent>
+        </Tooltip>
         {environmentFilter && (
           <MultiSelect
             title="Environment"
