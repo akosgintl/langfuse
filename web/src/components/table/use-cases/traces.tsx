@@ -213,6 +213,7 @@ export default function TracesTable({
   const filterOptions = useMemo(
     () => ({
       name: traceFilterOptionsResponse.data?.name?.map((n) => n.value) || [],
+      tags: traceFilterOptionsResponse.data?.tags?.map((t) => t.value) || [],
       environment:
         environmentFilterOptions.data?.map((value) => value.environment) || [],
       level: ["DEFAULT", "DEBUG", "WARNING", "ERROR"],

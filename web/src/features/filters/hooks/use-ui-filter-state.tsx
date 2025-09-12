@@ -99,6 +99,38 @@ export function useUIFilterState({
     filterOptionsQuery.isLoading,
   ]);
 
+  // Tags filter
+  const tagsFilter = useMemo((): UIFilter => {
+    // Find selected values from filterState
+    const tagsFilterState = filterState.find((f) => f.column === "tags");
+    const selectedTags = (tagsFilterState?.value as string[]) || [];
+
+    // Get available tags from the centralized query
+    const availableTags =
+      filterOptionsQuery.data?.tags?.map((t) => t.value) || [];
+    const tagsCounts = new Map(
+      filterOptionsQuery.data?.tags?.map((t) => [t.value, t.count]) || [],
+    );
+
+    return {
+      column: "tags",
+      label: "Tags",
+      shortKey: getShortKey("tags"),
+      value: selectedTags,
+      options: availableTags,
+      counts: tagsCounts,
+      loading: filterOptionsQuery.isLoading,
+      expanded: expandedState.includes("tags"),
+      onChange: (values: string[]) => updateFilter("tags", values),
+    };
+  }, [
+    filterState,
+    updateFilter,
+    expandedState,
+    filterOptionsQuery.data,
+    filterOptionsQuery.isLoading,
+  ]);
+
   // Level filter
   const levelFilter = useMemo((): UIFilter => {
     const availableLevels = ["DEFAULT", "DEBUG", "WARNING", "ERROR"];
@@ -123,7 +155,7 @@ export function useUIFilterState({
 
   // Return filters array and expanded state
   return {
-    filters: [nameFilter, levelFilter],
+    filters: [nameFilter, tagsFilter, levelFilter],
     expanded: expandedState,
     onExpandedChange,
   };

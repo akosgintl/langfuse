@@ -5,6 +5,10 @@ const FILTER_DEFINITIONS = {
     label: "Name",
     queryKey: "name",
   },
+  tags: {
+    label: "Tags",
+    queryKey: "tags",
+  },
   environment: {
     label: "Environment",
     queryKey: "env",
