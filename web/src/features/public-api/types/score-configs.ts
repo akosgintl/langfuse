@@ -25,12 +25,7 @@ const APIScoreConfig = z
   .discriminatedUnion("dataType", [
     ScoreConfigBase.merge(NumericConfigFields),
     ScoreConfigBase.merge(CategoricalConfigFields),
-    ScoreConfigBase.merge(
-      z.object({
-        dataType: z.literal("BOOLEAN"),
-        categories: z.undefined(),
-      }),
-    ),
+    ScoreConfigBase.merge(BooleanConfigFields),
   ])
   .superRefine((data, ctx) => {
     if (data.dataType === "NUMERIC") {
@@ -64,7 +59,12 @@ export const PostScoreConfigBody = z
   .discriminatedUnion("dataType", [
     PostScoreConfigBase.merge(NumericConfigFields),
     PostScoreConfigBase.merge(CategoricalConfigFields),
-    PostScoreConfigBase.merge(BooleanConfigFields),
+    PostScoreConfigBase.merge(
+      z.object({
+        dataType: z.literal("BOOLEAN"),
+        categories: z.undefined(),
+      }),
+    ),
   ])
   .superRefine((data, ctx) => {
     if (data.dataType === "NUMERIC") {
