@@ -1,10 +1,8 @@
 import { z } from "zod/v4";
 import { ScoreConfig as ScoreConfigDbType } from "@prisma/client";
-import { isPresent } from "../../utils/typeChecks";
 import {
   ScoreConfigDomain,
   ScoreConfigSchema,
-  ScoreConfigCategory,
 } from "../../domain/score-configs";
 
 /**
@@ -50,67 +48,67 @@ export const validateDbScoreConfig = (
 export const validateDbScoreConfigSafe = (scoreConfig: ScoreConfigDbType) =>
   ScoreConfigSchema.safeParse(scoreConfig);
 
-// Unified input schema for both create and update operations
-export const ScoreConfigInputSchema = z.object({
-  name: z.string().min(1).max(35),
-  description: z.string().optional(),
-  dataType: z.enum(["NUMERIC", "CATEGORICAL", "BOOLEAN"]),
-  minValue: z.number().optional(),
-  maxValue: z.number().optional(),
-  categories: z.array(ScoreConfigCategory).optional(),
-});
+// // Unified input schema for both create and update operations
+// export const ScoreConfigInputSchema = z.object({
+//   name: z.string().min(1).max(35),
+//   description: z.string().optional(),
+//   dataType: z.enum(["NUMERIC", "CATEGORICAL", "BOOLEAN"]),
+//   minValue: z.number().optional(),
+//   maxValue: z.number().optional(),
+//   categories: z.array(ScoreConfigCategory).optional(),
+// });
 
-export const validateScoreConfigInput = (
-  input: z.infer<typeof ScoreConfigInputSchema>,
-): string | null => {
-  const { dataType, minValue, maxValue, categories } = input;
+// export const validateScoreConfigInput = (
+//   input: z.infer<typeof ScoreConfigInputSchema>,
+// ): string | null => {
+//   const { dataType, minValue, maxValue, categories } = input;
 
-  // Numeric validation
-  if (dataType === "NUMERIC") {
-    if (isPresent(maxValue) && isPresent(minValue) && maxValue <= minValue) {
-      return "Maximum value must be greater than Minimum value.";
-    }
-  }
+//   // Numeric validation
+//   if (dataType === "NUMERIC") {
+//     if (isPresent(maxValue) && isPresent(minValue) && maxValue <= minValue) {
+//       return "Maximum value must be greater than Minimum value.";
+//     }
+//   }
 
-  // Categorical and Boolean validation
-  if ((dataType === "CATEGORICAL" || dataType === "BOOLEAN") && categories) {
-    // Boolean must have exactly 2 categories
-    if (dataType === "BOOLEAN" && categories.length !== 2) {
-      return "Boolean data type must have exactly 2 categories.";
-    }
+//   // Categorical and Boolean validation
+//   if ((dataType === "CATEGORICAL" || dataType === "BOOLEAN") && categories) {
+//     // Boolean must have exactly 2 categories
+//     if (dataType === "BOOLEAN" && categories.length !== 2) {
+//       return "Boolean data type must have exactly 2 categories.";
+//     }
 
-    // Check for unique labels and values
-    const uniqueLabels = new Set<string>();
-    const uniqueValues = new Set<number>();
+//     // Check for unique labels and values
+//     const uniqueLabels = new Set<string>();
+//     const uniqueValues = new Set<number>();
 
-    for (const category of categories) {
-      if (uniqueLabels.has(category.label)) {
-        return "Category names must be unique.";
-      }
-      uniqueLabels.add(category.label);
+//     for (const category of categories) {
+//       if (uniqueLabels.has(category.label)) {
+//         return "Category names must be unique.";
+//       }
+//       uniqueLabels.add(category.label);
 
-      if (uniqueValues.has(category.value)) {
-        return "Category values must be unique.";
-      }
-      uniqueValues.add(category.value);
-    }
+//       if (uniqueValues.has(category.value)) {
+//         return "Category values must be unique.";
+//       }
+//       uniqueValues.add(category.value);
+//     }
 
-    // Boolean categories must be 0 and 1
-    if (dataType === "BOOLEAN") {
-      const values = categories.map((c) => c.value).sort();
-      if (values[0] !== 0 || values[1] !== 1) {
-        return "Boolean data type must have categories with values 0 and 1.";
-      }
-    }
-  }
+//     // Boolean categories must be 0 and 1
+//     if (dataType === "BOOLEAN") {
+//       const values = categories.map((c) => c.value).sort();
+//       if (values[0] !== 0 || values[1] !== 1) {
+//         return "Boolean data type must have categories with values 0 and 1.";
+//       }
+//     }
+//   }
 
-  // Required categories for categorical/boolean types
-  if (
-    (dataType === "CATEGORICAL" || dataType === "BOOLEAN") &&
-    (!categories || categories.length === 0)
-  ) {
-    return `${dataType === "BOOLEAN" ? "Boolean" : "Categorical"} data type requires categories.`;
-  }
+//   // Required categories for categorical/boolean types
+//   if (
+//     (dataType === "CATEGORICAL" || dataType === "BOOLEAN") &&
+//     (!categories || categories.length === 0)
+//   ) {
+//     return `${dataType === "BOOLEAN" ? "Boolean" : "Categorical"} data type requires categories.`;
+//   }
 
-  return null;
-};
+//   return null;
+// };
