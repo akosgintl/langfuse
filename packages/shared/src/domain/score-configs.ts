@@ -74,16 +74,16 @@ export const CategoricalConfigFields = z.object({
 
 const ScoreConfigBase = z.object({
   id: z.string(),
-  projectId: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
+  name: z.string().min(1).max(35),
+  isArchived: z.boolean(),
+  description: z.string().nullish(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  isArchived: z.boolean(),
+  projectId: z.string(),
 });
 
 export const ScoreConfigSchema = z
-  .discriminatedUnion("dataType", [
+  .union([
     ScoreConfigBase.merge(NumericConfigFields),
     ScoreConfigBase.merge(CategoricalConfigFields),
     ScoreConfigBase.merge(BooleanConfigFields),
