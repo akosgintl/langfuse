@@ -59,6 +59,7 @@ export const PostScoreConfigBody = z
   .discriminatedUnion("dataType", [
     PostScoreConfigBase.merge(NumericConfigFields),
     PostScoreConfigBase.merge(CategoricalConfigFields),
+    // Boolean config API POST body will always infer the categories based on data type
     PostScoreConfigBase.merge(
       z.object({
         dataType: z.literal("BOOLEAN"),
